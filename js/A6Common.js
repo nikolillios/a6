@@ -63,13 +63,13 @@ function commonInit() {
     // * Set defaultTextureTarget to the name of the uniform sampler to get images dropped on the window
     var container = document.getElementById('container');
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 50);
-    camera.position.z = 5;
+    camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.01, 50);
+    camera.position.z = 10;
 
     scene = new THREE.Scene();
 
     renderer = new THREE.WebGLRenderer({ antialias: true }); // WebGLRenderer CanvasRenderer
-    renderer.setClearColor(0x707080);
+    renderer.setClearColor(0x404040);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
@@ -212,6 +212,7 @@ function loadTexture(file, uniformName) {
         var loader = new THREE.TextureLoader();
         loader.load(contents, function(texture) {
             meshMaterial.uniforms[uniformName] = { type: 't', value: texture };
+            meshMaterial.uniforms.hasTexture = { value: true };
             meshMaterial.needsUpdate = true;
         });
     });
