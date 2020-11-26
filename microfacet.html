@@ -1,51 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Microfacet reflectance</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <style>
-            body {
-                font-family: Monospace;
-                background-color: #707080;
-                margin: 0px;
-                overflow: hidden;
-            }
-        </style>
-    </head>
-    <body>
+
+<head>
+    <title>Microfacet reflectance</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            font-family: Monospace;
+            background-color: #707080;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
     <div id="container">
         <div id="controlBar" style="text-align: center;">
             <input type="file" id="meshInputFile" style="display: none;" onchange="loadFile(this.files[0])">
-            <input type="button" id="meshInputButton" value="Select OBJ File" onclick="document.getElementById('meshInputFile').click()">
-            <input type="file" id="texInputFile" style="display: none;" onchange="loadTexture(this.files[0], 'diffuseTexture')">
-            <input type="button" id="texInputButton" value="Select Texture File" onclick="document.getElementById('texInputFile').click()">
-            <label><input type="checkbox" id="showAxesCheckbox" onchange="toggleAxes(this.checked)" checked="true">Show Axes</label>
-            <label><input type="checkbox" id="showWireframeCheckbox" onchange="toggleWireframe(this.checked)">Show Wireframe</label>
-            <label><input type="checkbox" id="showNormalsCheckbox" onchange="toggleNormals(this.checked)">Show Normals</label>
-            <label><input type="checkbox" id="fixLightsToCameraCheckbox" onchange="toggleFixLightsToCamera(this.checked)">Fix lights to camera</label>
+            <input type="button" id="meshInputButton" value="Select OBJ File"
+                onclick="document.getElementById('meshInputFile').click()">
+            <input type="file" id="texInputFile" style="display: none;"
+                onchange="loadTexture(this.files[0], 'diffuseTexture')">
+            <input type="button" id="texInputButton" value="Select Texture File"
+                onclick="document.getElementById('texInputFile').click()">
+            <label><input type="checkbox" id="showAxesCheckbox" onchange="toggleAxes(this.checked)" checked="true">Show
+                Axes</label>
+            <label><input type="checkbox" id="showWireframeCheckbox" onchange="toggleWireframe(this.checked)">Show
+                Wireframe</label>
+            <label><input type="checkbox" id="showNormalsCheckbox" onchange="toggleNormals(this.checked)">Show
+                Normals</label>
+            <label><input type="checkbox" id="fixLightsToCameraCheckbox"
+                    onchange="toggleFixLightsToCamera(this.checked)">Fix lights to camera</label>
             <br>
             Normal length:
-            <input type="range" id="normalLengthRange" min="0.02" max="0.5" step="0.02" value="0.3" oninput="setNormalLength(this.value)">
+            <input type="range" id="normalLengthRange" min="0.02" max="0.5" step="0.02" value="0.3"
+                oninput="setNormalLength(this.value)">
             Exposure:
-            <input type="range" id="exposureRange" min="-10.0" max="10.0" step="0.5" value="0.0" oninput="setUniformLog('exposure', this.value)">
+            <input type="range" id="exposureRange" min="-10.0" max="10.0" step="0.5" value="0.0"
+                oninput="setUniformLog('exposure', this.value)">
             Alpha:
-            <input type="range" id="alphaRange" min="-7.0" max="-1.0" step="0.25" value="-2.0" oninput="setUniformLog('alpha', this.value)">
+            <input type="range" id="alphaRange" min="-7.0" max="-1.0" step="0.25" value="-2.0"
+                oninput="setUniformLog('alpha', this.value)">
             <br>
             Left click + drag to orbit. Right click + drag to pan. Scroll to zoom.
         </div>
     </div>
 
-        <script src="js/three.min.js"></script>
-        <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r84/three.min.js"></script> -->
-        <script src="js/BufferGeometryUtils.js"></script>
-        <script src="js/Detector.js"></script>
-        <script src="js/OrbitControls.js"></script>
-        <script src="js/OBJLoader.js"></script>
-<!-----------------------------------------------------------------------------
+    <script src="js/three.min.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r84/three.min.js"></script> -->
+    <script src="js/BufferGeometryUtils.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <!-----------------------------------------------------------------------------
         VERTEX SHADER
 ------------------------------------------------------------------------------>
-        <script id="vertexShader" type="x-shader/x-vertex">
+    <script id="vertexShader" type="x-shader/x-vertex">
 // = object.matrixWorld
 // uniform mat4 modelMatrix;
 
@@ -73,13 +85,13 @@
 
 void main() {
     // TODO#A6: Compute gl_Position, as well as any varyings you need in the fragment shader.
-    gl_Position = vec4(1.0); // placeholder
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);
 }
         </script>
-<!-----------------------------------------------------------------------------
+    <!-----------------------------------------------------------------------------
         FRAGMENT SHADER
 ------------------------------------------------------------------------------>
-        <script id="fragmentShader" type="x-shader/x-fragment">
+    <script id="fragmentShader" type="x-shader/x-fragment">
 
 #define M_PI 3.141592653589793238
 
@@ -191,27 +203,28 @@ void main() {
 }
 
         </script>
-<!-----------------------------------------------------------------------------
+    <!-----------------------------------------------------------------------------
         END SHADERS
 ------------------------------------------------------------------------------>
-        <script src="js/A6Common.js"></script>
-        <script>
-            commonInit(false);
-            init();
-            animate();
-            
-            function init() {
-                defaultTextureTarget = 'diffuseTexture';
-                meshMaterial.uniforms.diffuseTexture = { type: 't', value: null };
-                meshMaterial.uniforms.ambientIntensity = { value: new THREE.Vector3(.1, .1, .1) };
-                meshMaterial.uniforms.hasTexture = { value: false };
-                meshMaterial.uniforms.diffuseColor = { value: new THREE.Vector3(0.2, 0.2, 0.2) };
-            
-                addLight(new THREE.Vector3(50, 50, 100), new THREE.Vector3(25000, 25000, 25000));
-                addLight(new THREE.Vector3(-60, 20, -60), new THREE.Vector3(4000, 4000, 4000));
-                
-                document.getElementById('alphaRange').oninput();
-            }
-        </script>
-    </body>
+    <script src="js/A6Common.js"></script>
+    <script>
+        commonInit(false);
+        init();
+        animate();
+
+        function init() {
+            defaultTextureTarget = 'diffuseTexture';
+            meshMaterial.uniforms.diffuseTexture = { type: 't', value: null };
+            meshMaterial.uniforms.ambientIntensity = { value: new THREE.Vector3(.1, .1, .1) };
+            meshMaterial.uniforms.hasTexture = { value: false };
+            meshMaterial.uniforms.diffuseColor = { value: new THREE.Vector3(0.2, 0.2, 0.2) };
+
+            addLight(new THREE.Vector3(50, 50, 100), new THREE.Vector3(25000, 25000, 25000));
+            addLight(new THREE.Vector3(-60, 20, -60), new THREE.Vector3(4000, 4000, 4000));
+
+            document.getElementById('alphaRange').oninput();
+        }
+    </script>
+</body>
+
 </html>

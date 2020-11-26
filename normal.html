@@ -78,9 +78,23 @@ attribute vec3 tangent2;
 
 // TODO#A6: Declare any varyings here.
 
+varying vec2 vUv;
+varying vec3 vNormal; // normal at the vertex in eye space
+varying vec3 vTangent;
+varying vec3 vTangent2;
+varying vec4 vPosition; // vertex position in eye space
+
 void main() {
-    // TODO#A6: Compute gl_Position, as well as any varyings you need in the fragment shader.
-    gl_Position = vec4(1.0); // placeholder
+    // Calculate point in eye space
+    vPosition = modelViewMatrix * vec4(position, 1.0);
+    // Calculate projected point
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+    // We have to use the inverse transpose of the modelview matrix for the normal
+    vNormal = normalize((normalMatrix * normal).xyz);
+    vUv = uv;
+    vTangent = normalize(modelViewMatrix*vec4(tangent,1.0)).xyz;
+    vTangent2 = normalize(modelViewMatrix*vec4(tangent2,1.0)).xyz;
 }
         </script>
 <!-----------------------------------------------------------------------------
@@ -100,21 +114,57 @@ uniform float exposure;
 uniform float roughness;
 uniform float bumpiness;
 
+varying vec2 vUv;
+varying vec3 vNormal; // fragment normal in eye space
+varying vec3 vTangent;
+varying vec3 vTangent2;
+varying vec4 vPosition; // fragment position in eye space
+
 uniform vec3 diffuseColor;
 uniform sampler2D diffuseTexture;
 uniform bool hasTexture;  // false, use diffuseColor; true, use diffuseTexture
+
+vec3 to_sRGB(vec3 c) { return pow(c, vec3(1.0/2.2)); }
+vec3 from_sRGB(vec3 c) { return pow(c, vec3(2.2)); }
 
 uniform sampler2D normalMap;
 
 // TODO#A6: Declare any varyings here.
 
-vec3 to_sRGB(vec3 c) { return pow(c, vec3(1.0/2.2)); }
-vec3 from_sRGB(vec3 c) { return pow(c, vec3(2.2)); }
-
 void main() {
     // TODO#A6: Implement Phong reflectance function (or Microfacet BRDF) here
     // See phong.html for reference
-    gl_FragColor = vec4(1.0); // placeholder
+    // interpolating normals will change the length of the normal, so renormalize the normal.
+    vec3 normalTexture = texture2D(normalMap, vUv).rgb;
+    vec3 N = normalize(normalize(vNormal)*(normalTexture.b - 0.5)
+                +normalize(vTangent)*(normalTexture.r - 0.5)*bumpiness
+                +normalize(vTangent2)*(normalTexture.g - 0.5)*bumpiness);
+    vec3 V = normalize(-vPosition.xyz);
+
+    vec3 diffuseReflectance = hasTexture ? from_sRGB(texture2D(diffuseTexture, vUv).rgb) : diffuseColor;
+    vec3 finalColor = ambientIntensity * diffuseReflectance;
+
+    for (int i = 0; i < NUM_LIGHTS; i++) {
+        float r = length(lightPositions[i] - vPosition.xyz);
+        vec3 L = normalize(lightPositions[i] - vPosition.xyz);
+        vec3 H = normalize(L + V);
+
+        // calculate diffuse term
+        vec3 Idiff = diffuseReflectance / M_PI * max(dot(N, L), 0.0);
+
+        // calculate specular term
+        vec3 Ispec = vec3(1.0) * pow(max(dot(N, H), 0.0), 1.0 / roughness);
+
+        finalColor += lightColors[i] * (Idiff + Ispec) / (r*r);
+    }
+
+    // Only shade if facing the light
+    // Color the back faces an identifiable color
+    if (gl_FrontFacing) {
+        gl_FragColor = vec4(to_sRGB(finalColor * exposure), 1.0);
+    } else {
+        gl_FragColor = vec4(170.0/255.0, 160.0/255.0, 0.0, 1.0);
+    }
 }
         </script>
 <!-----------------------------------------------------------------------------
