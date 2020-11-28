@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b13ce1a3-9525-4665-9086-877b8c0adbd0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/environment.html" beforeDir="false" afterPath="$PROJECT_DIR$/environment.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/microfacet.html" beforeDir="false" afterPath="$PROJECT_DIR$/microfacet.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/normal.html" beforeDir="false" afterPath="$PROJECT_DIR$/normal.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +33,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1606343991070</updated>
-      <workItem from="1606343992215" duration="12804000" />
+      <workItem from="1606343992215" duration="18903000" />
     </task>
     <servers />
   </component>
