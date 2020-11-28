@@ -209,6 +209,7 @@ vec3 ACES_filmic(vec3 x)
     return saturate((x*(a*x+b))/(x*(c*x+d)+e));
 }
 
+// returns the specular BRDF value given by incoming vector L, outgoing vector V, and normal vector N
 float specularBRDF(vec3 L, vec3 V, vec3 N)
 {
     vec3 H = normalize(L+V);
@@ -228,10 +229,11 @@ void main() {
         float r = length(lightPositions[i] - vPosition.xyz);
         vec3 L = normalize(lightPositions[i] - vPosition.xyz);
         vec3 H = normalize(L + V);
-
+        // calculate BRDF contribution from light number i
         finalColor += (diffuseReflectance/M_PI + specularBRDF(L, V, N))*lightColors[i]*max(dot(L,N), 0.0)/(r*r);
 
     }
+    // apply exposure, tone mapping, and gamma correction
     gl_FragColor = vec4(to_sRGB(ACES_filmic(finalColor * exposure)), 1.0);
 }
 

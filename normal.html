@@ -136,6 +136,7 @@ void main() {
     // See phong.html for reference
     // interpolating normals will change the length of the normal, so renormalize the normal.
     vec3 normalTexture = texture2D(normalMap, vUv).rgb;
+    //calculate normal based on weighted average of normal map values
     vec3 N = normalize(normalize(vNormal)*(normalTexture.b - 0.5)
                 +normalize(vTangent)*(normalTexture.r - 0.5)*bumpiness
                 +normalize(vTangent2)*(normalTexture.g - 0.5)*bumpiness);
